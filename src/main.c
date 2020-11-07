@@ -6,7 +6,8 @@ void SystemClock_Config(void);
 
 I2S_HandleTypeDef hi2s2;
 
-uint16_t data[10];
+uint16_t data_tx[10];
+uint16_t data_rx[10];
 
 int main(void) {
 
@@ -17,16 +18,23 @@ int main(void) {
   LED_Init();
   I2S2_Init();
 
-  data[0] = 0xEE55;
-  data[1] = 0x1025;
-  data[8] = 0x1025;
-  data[9] = 0x55EE;
+  for(int i=0;i<10;i++){
+    data_tx[i] = i;
+  }
+  data_tx[0] = 0xEE55;
+  data_tx[1] = 0x1025;
+  data_tx[8] = 0x1025;
+  data_tx[9] = 0x55EE;
 
   while (1)
   {
-    HAL_I2S_Transmit(&hi2s2,data,10,100);
+    //HAL_I2S_Transmit(&hi2s2,data_tx,10,100);
+    //HAL_Delay(100);
+    //HAL_I2S_Transmit(&hi2s2,data_tx,10,100);
+    //HAL_Delay(100);
+    HAL_I2S_Receive(&hi2s2,data_rx,10,100);
     HAL_GPIO_TogglePin(LED_GPIO_PORT, LED_PIN);
-    HAL_Delay(1000);
+    HAL_Delay(300);
   }
 }
 
