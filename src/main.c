@@ -3,6 +3,7 @@
 void LED_Init();
 void I2S2_Init();
 void SystemClock_Config(void);
+void Error_Handler(void);
 
 I2S_HandleTypeDef hi2s2;
 
@@ -29,56 +30,13 @@ int main(void) {
   while (1)
   {
     //HAL_I2S_Transmit(&hi2s2,data_tx,10,100);
-    //HAL_Delay(100);
-    //HAL_I2S_Transmit(&hi2s2,data_tx,10,100);
-    //HAL_Delay(100);
     HAL_I2S_Receive(&hi2s2,data_rx,10,100);
+    HAL_Delay(100);
     HAL_GPIO_TogglePin(LED_GPIO_PORT, LED_PIN);
     HAL_Delay(300);
   }
 }
 
-void LED_Init() {
-
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = LED_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(LED_GPIO_PORT, &GPIO_InitStruct);
-}
-
-void Error_Handler(){
-  while(1){
-
-  }
-}
-
-void I2S2_Init(void)
-{
-
-  __HAL_RCC_SPI2_CLK_ENABLE();
-
-  hi2s2.Instance = SPI2;
-  hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
-  hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
-  hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
-  hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_ENABLE;
-  hi2s2.Init.AudioFreq = I2S_AUDIOFREQ_16K;
-  hi2s2.Init.CPOL = I2S_CPOL_LOW;
-  hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
-  hi2s2.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
-  if (HAL_I2S_Init(&hi2s2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
-
-void SysTick_Handler(void) {
-  HAL_IncTick();
-}
 
 void SystemClock_Config(void)
 {
@@ -119,12 +77,57 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S;
-  PeriphClkInitStruct.PLLI2S.PLLI2SN = 100;
+  PeriphClkInitStruct.PLLI2S.PLLI2SN = 164;
   PeriphClkInitStruct.PLLI2S.PLLI2SM = 25;
   PeriphClkInitStruct.PLLI2S.PLLI2SR = 5;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
+}
+
+void I2S2_Init(void)
+{
+
+  __HAL_RCC_SPI2_CLK_ENABLE();
+
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  hi2s2.Instance = SPI2;
+  hi2s2.Init.Mode = I2S_MODE_MASTER_RX;
+  hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
+  hi2s2.Init.DataFormat = I2S_DATAFORMAT_24B;
+  hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
+  hi2s2.Init.AudioFreq = I2S_AUDIOFREQ_32K;
+  hi2s2.Init.CPOL = I2S_CPOL_LOW;
+  hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
+  hi2s2.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
+  if (HAL_I2S_Init(&hi2s2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+void LED_Init() {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+}
+
+void Error_Handler(){
+  while(1){
+
+  }
+}
+
+void SysTick_Handler(void) {
+  HAL_IncTick();
 }
 
