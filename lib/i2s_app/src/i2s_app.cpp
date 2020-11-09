@@ -90,9 +90,11 @@ bool I2sApp::init(void)
 bool I2sApp::receive(uint16_t *pData, uint16_t size, uint32_t Timeout){
   if (HAL_I2S_Receive(&hi2s2,pData,size,Timeout) != HAL_OK)
   {
-    Error_Handler();
+    return false;
   }
-  return true;
+  else{
+    return true;
+  }
 }
 
 void Error_Handler(){
