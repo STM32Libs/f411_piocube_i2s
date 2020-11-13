@@ -12,12 +12,13 @@ void setup(void) {
 
   led.init(GPIOC,GPIO_PIN_13);
   mic.init();
+  mic.receive(data_rx,10,100);
 }
 
 void loop(){
     led.on();
-    mic.receive(data_rx,10,100);
+    HAL_Delay(10);
     led.off();
-    HAL_Delay(2000);
+    HAL_Delay(1990);
 }
 
