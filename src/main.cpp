@@ -15,10 +15,9 @@ void setup(void) {
 }
 
 void loop(){
-    mic.receive(data_rx,10,100);
     led.on();
-    HAL_Delay(1);
+    mic.receive(data_rx,10,100);
     led.off();
-    HAL_Delay(1999);
+    HAL_Delay(2000);
 }
 
