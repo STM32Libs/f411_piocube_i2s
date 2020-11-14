@@ -5,6 +5,7 @@ void Error_Handler(void);
 
 I2S_HandleTypeDef hi2s2;
 DMA_HandleTypeDef hdma_spi2_rx;
+DMA_HandleTypeDef *hdmarx;      /*!< I2S Rx DMA handle parameters */
 
 static void MX_I2S2_Init(void);
 static void MX_DMA_Init(void);

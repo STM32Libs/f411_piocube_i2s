@@ -6,13 +6,15 @@
 I2sApp mic;
 LedApp led;
 
-uint16_t data_rx[10*2];//32bit samples
+uint16_t data_rx[1000*2];//32bit samples
 
 void setup(void) {
 
   led.init(GPIOC,GPIO_PIN_13);
   mic.init();
-  mic.receive(data_rx,10,100);
+  led.on();
+  mic.receive(data_rx,200,100);
+  led.off();
 }
 
 void loop(){
