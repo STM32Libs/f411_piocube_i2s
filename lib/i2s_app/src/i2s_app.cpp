@@ -53,8 +53,7 @@ bool I2sApp::init(Mode_e mode_v)
 }
 
 
-// HAL_I2S_DMAPause Resume Stop
-bool I2sApp::receive(uint32_t *pData, uint16_t size){
+bool I2sApp::receive(int32_t *pData, uint16_t size){
   uint16_t *pu16 = reinterpret_cast<uint16_t*>(pData);
   if (HAL_I2S_Receive_DMA(&hi2s2,pu16,size) != HAL_OK)
   {
@@ -75,8 +74,18 @@ bool I2sApp::pause(){
   }
 }
 
-bool I2sApp::receive_direct(uint16_t *pData, uint16_t size, uint32_t Timeout){
-  if (HAL_I2S_Receive(&hi2s2,pData,size,Timeout) != HAL_OK)
+bool I2sApp::resume(){
+  if (HAL_I2S_DMAResume(&hi2s2) != HAL_OK)
+  {
+    return false;
+  }
+  else{
+    return true;
+  }
+}
+
+bool I2sApp::stop(){
+  if (HAL_I2S_DMAStop(&hi2s2) != HAL_OK)
   {
     return false;
   }
@@ -173,19 +182,19 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
   if(mode == I2sApp::DMA){
     /* I2S2 DMA Init */
     /* SPI2_RX Init */
-    hdma_spi2_rx.Instance = DMA1_Stream3;
-    hdma_spi2_rx.Init.Channel = DMA_CHANNEL_0;
+    hdma_spi2_rx.Instance       = DMA1_Stream3;
+    hdma_spi2_rx.Init.Channel   = DMA_CHANNEL_0;
     hdma_spi2_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_spi2_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi2_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi2_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma_spi2_rx.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma_spi2_rx.Init.Mode = DMA_CIRCULAR;
-    hdma_spi2_rx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_spi2_rx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-    hdma_spi2_rx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-    hdma_spi2_rx.Init.MemBurst = DMA_MBURST_SINGLE;
-    hdma_spi2_rx.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    hdma_spi2_rx.Init.MemInc    = DMA_MINC_ENABLE;
+    hdma_spi2_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_spi2_rx.Init.MemDataAlignment    = DMA_PDATAALIGN_HALFWORD;
+    hdma_spi2_rx.Init.Mode                = DMA_CIRCULAR;
+    hdma_spi2_rx.Init.Priority            = DMA_PRIORITY_HIGH;
+    hdma_spi2_rx.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
+    hdma_spi2_rx.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
+    hdma_spi2_rx.Init.MemBurst            = DMA_MBURST_SINGLE;
+    hdma_spi2_rx.Init.PeriphBurst         = DMA_PBURST_SINGLE;
     if (HAL_DMA_Init(&hdma_spi2_rx) != HAL_OK)
     {
       Error_Handler();
@@ -198,10 +207,16 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s){
     volatile uint8_t debug = 0;
     debug++;
+    //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+    
 }
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s){
     volatile uint8_t debug = 0;
     debug++;
+    //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+    //HAL_I2S_DMAStop(&hi2s2);
 }
 void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s){
     volatile uint8_t debug = 0;
