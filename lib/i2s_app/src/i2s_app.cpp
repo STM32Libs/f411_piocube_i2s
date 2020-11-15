@@ -211,7 +211,9 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s){
 }
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s){
+  if(packet_callback != nullptr){
     packet_callback();
+  }
 }
 
 void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s){
