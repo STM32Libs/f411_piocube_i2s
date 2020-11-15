@@ -1,11 +1,13 @@
 #include "i2s_app.h"
 #include "stm32f4xx_hal.h"
+#include "i2s_it.h"
 
 void Error_Handler(void);
 
 I2S_HandleTypeDef hi2s2;
 DMA_HandleTypeDef hdma_spi2_rx;
 DMA_HandleTypeDef *hdmarx;      /*!< I2S Rx DMA handle parameters */
+I2sApp::Mode_e mode = I2sApp::Blocking;
 
 static void MX_I2S2_Init(void);
 static void MX_DMA_Init(void);
@@ -30,8 +32,9 @@ I2sApp::I2sApp(){
   
 }
 
-bool I2sApp::init(void)
+bool I2sApp::init(Mode_e mode_v)
 {
+  mode = mode_v;
 
   SystemClock_Config_I2S();
 
@@ -41,13 +44,38 @@ bool I2sApp::init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
 
-  MX_DMA_Init();
+  if(mode == I2sApp::DMA){
+      MX_DMA_Init();
+  }
   MX_I2S2_Init();
 
   return true;
 }
 
-bool I2sApp::receive(uint16_t *pData, uint16_t size, uint32_t Timeout){
+
+// HAL_I2S_DMAPause Resume Stop
+bool I2sApp::receive(uint32_t *pData, uint16_t size){
+  uint16_t *pu16 = reinterpret_cast<uint16_t*>(pData);
+  if (HAL_I2S_Receive_DMA(&hi2s2,pu16,size) != HAL_OK)
+  {
+    return false;
+  }
+  else{
+    return true;
+  }
+}
+
+bool I2sApp::pause(){
+  if (HAL_I2S_DMAPause(&hi2s2) != HAL_OK)
+  {
+    return false;
+  }
+  else{
+    return true;
+  }
+}
+
+bool I2sApp::receive_direct(uint16_t *pData, uint16_t size, uint32_t Timeout){
   if (HAL_I2S_Receive(&hi2s2,pData,size,Timeout) != HAL_OK)
   {
     return false;
@@ -57,7 +85,9 @@ bool I2sApp::receive(uint16_t *pData, uint16_t size, uint32_t Timeout){
   }
 }
 
-void DMA1_Stream3_IRQHandler(void)
+//defined in startup '.s' as EXPORT  DMA1_Stream3_IRQHandler           [WEAK]
+//redirect needed, direct instantiation here of 'DMA1_Stream3_IRQHandler' does not trigger
+void I2sApp_DMA1_Stream3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream3_IRQn 0 */
 
@@ -140,6 +170,7 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
   }
 
 
+  if(mode == I2sApp::DMA){
     /* I2S2 DMA Init */
     /* SPI2_RX Init */
     hdma_spi2_rx.Instance = DMA1_Stream3;
@@ -161,6 +192,19 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
     }
 
     __HAL_LINKDMA(hi2s,hdmarx,hdma_spi2_rx);
+  }
+}
 
+void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s){
+    volatile uint8_t debug = 0;
+    debug++;
+}
+void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s){
+    volatile uint8_t debug = 0;
+    debug++;
+}
+void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s){
+    volatile uint8_t debug = 0;
+    debug++;
 }
 
