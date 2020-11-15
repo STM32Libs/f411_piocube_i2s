@@ -8,9 +8,16 @@ LedApp led;
 
 int32_t data_rx[64];//32bit samples
 
+void PacketReceived(){
+    volatile uint8_t debug = 0;
+    debug++;
+    led.toggle();
+}
+
 void setup(void) {
   led.init(GPIOC,GPIO_PIN_13);
   mic.init(I2sApp::DMA);
+  mic.onPacket(PacketReceived);
   led.off();
   HAL_Delay(1);
   led.on();

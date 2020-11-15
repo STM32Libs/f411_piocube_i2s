@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+typedef void (*PacketCallback)();
 class I2sApp{
     public:
         enum Mode_e : uint8_t
@@ -10,6 +11,7 @@ class I2sApp{
         };    
         I2sApp();
         bool init(Mode_e mode=Blocking );
+        void onPacket(PacketCallback cb);
         bool receive(int32_t *pData, uint16_t Size);
         bool pause();
         bool resume();

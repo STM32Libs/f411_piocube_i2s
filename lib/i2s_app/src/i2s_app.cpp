@@ -8,6 +8,7 @@ I2S_HandleTypeDef hi2s2;
 DMA_HandleTypeDef hdma_spi2_rx;
 DMA_HandleTypeDef *hdmarx;      /*!< I2S Rx DMA handle parameters */
 I2sApp::Mode_e mode = I2sApp::Blocking;
+PacketCallback packet_callback = nullptr;
 
 static void MX_I2S2_Init(void);
 static void MX_DMA_Init(void);
@@ -52,6 +53,9 @@ bool I2sApp::init(Mode_e mode_v)
   return true;
 }
 
+void I2sApp::onPacket(PacketCallback cb){
+  packet_callback = cb;
+}
 
 bool I2sApp::receive(int32_t *pData, uint16_t size){
   uint16_t *pu16 = reinterpret_cast<uint16_t*>(pData);
@@ -205,21 +209,11 @@ void HAL_I2S_MspInit_no_cb(I2S_HandleTypeDef* hi2s)
 }
 
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s){
-    volatile uint8_t debug = 0;
-    debug++;
-    //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-    
 }
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s){
-    volatile uint8_t debug = 0;
-    debug++;
-    //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-    //HAL_I2S_DMAStop(&hi2s2);
+    packet_callback();
 }
+
 void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s){
-    volatile uint8_t debug = 0;
-    debug++;
 }
 

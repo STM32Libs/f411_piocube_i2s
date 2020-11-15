@@ -25,3 +25,7 @@ void LedApp::on(){
 void LedApp::off(){
   HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
 }
+
+void LedApp::toggle(){
+  HAL_GPIO_TogglePin(port, pin);
+}
