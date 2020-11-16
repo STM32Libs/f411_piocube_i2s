@@ -6,12 +6,28 @@
 I2sApp mic;
 LedApp led;
 
-int32_t data_rx[64];//32bit samples
+uint16_t data_rx[128];//32bit samples
+int32_t frac_rx[32];
 
+//0x0B05 C000 => 0xB05C0 => 722368
 void PacketReceived(){
-    volatile uint8_t debug = 0;
-    debug++;
+    mic.stop();
     led.toggle();
+    uint16_t *p_data = data_rx;
+    for(int i=0;i<32;i++){
+      uint32_t val = static_cast<uint32_t>(*p_data++);
+      int32_t frac = (val<<16) + static_cast<uint32_t>(*p_data++);
+      frac>>=14;
+      //if(*p_data & 0x8000){
+      //  frac |= 0x02;
+      //}
+      //if(*p_data++ & 0x4000){
+      //  frac |= 0x01;
+      //}
+      frac_rx[i] = frac;
+    }
+    led.toggle();
+    p_data = data_rx;
 }
 
 void setup(void) {
@@ -21,7 +37,7 @@ void setup(void) {
   led.off();
   HAL_Delay(1);
   led.on();
-  mic.receive(data_rx,32);
+  mic.start(data_rx,32);
   //mic.pause();
   //led.off();
 }

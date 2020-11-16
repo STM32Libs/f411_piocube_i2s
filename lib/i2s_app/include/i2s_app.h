@@ -12,7 +12,7 @@ class I2sApp{
         I2sApp();
         bool init(Mode_e mode=Blocking );
         void onPacket(PacketCallback cb);
-        bool receive(int32_t *pData, uint16_t Size);
+        bool start(uint16_t *pData, uint16_t Size);
         bool pause();
         bool resume();
         bool stop();
