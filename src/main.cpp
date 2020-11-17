@@ -17,20 +17,13 @@ void PacketReceived(){
     for(int i=0;i<32;i++){
       uint32_t val = static_cast<uint32_t>(*p_data++);
       int32_t frac = (val<<16) + static_cast<uint32_t>(*p_data++);
-      frac>>=14;
-      //if(*p_data & 0x8000){
-      //  frac |= 0x02;
-      //}
-      //if(*p_data++ & 0x4000){
-      //  frac |= 0x01;
-      //}
-      frac_rx[i] = frac;
+      frac_rx[i] = frac>>8;
     }
     led.toggle();
-    p_data = data_rx;
 }
 
 void setup(void) {
+
   led.init(GPIOC,GPIO_PIN_13);
   mic.init(I2sApp::DMA);
   mic.onPacket(PacketReceived);
